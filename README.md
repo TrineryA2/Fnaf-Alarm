@@ -19,7 +19,7 @@ This app is built with **[web-to-app](https://github.com/shiaho777/web-to-app)**
 
 ## Download
 
-Download the app from **[GitHub Repo](https://github.com/TrineryA2/Fnaf-Alarm)**
+Download the app from **[GitHub Releases](https://github.com/TrineryA2/Fnaf-Alarm/releases/)**
 
 ## How to Use
 
