@@ -1,0 +1,8 @@
+A Five Nights at Freddy's inspired alarm clock with dramatic flip animations, multiple alarms, and complete visual customization.
+
+Features:
+- Flip animation (minutes then hours)
+- Multiple alarms with ON/OFF toggles
+- CSS editor for custom themes
+- Custom alarm tones
+- Fully offline
