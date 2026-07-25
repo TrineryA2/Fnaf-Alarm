@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FNAF 6:00 AM Alarm</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style id="main-styles">
+        :root {
+            --fnaf-bg: #000000;
+            --fnaf-text: #ffffff;
+            --panel-bg: rgba(15, 15, 15, 0.98);
+            --accent: #333333;
+            --accent-hover: #555555;
+            --alarm-color: #ffffff;
+            --flip-color: #ffffff;
+            --celeb-bg: #000000;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--fnaf-bg);
+            color: var(--fnaf-text);
+            font-family: 'Press Start 2P', cursive;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Clock Container - Hidden by default */
+        #clock-container {
+            text-align: center;
+            user-select: none;
+            z-index: 1;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        #clock-container.visible {
+            opacity: 1;
+        }
+
+        .clock-display {
+            font-size: 4rem;
+            font-weight: 400;
+            display: flex;
+            align-items: center;
+            letter-spacing: 5px;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .time-separator {
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0; }
+        }
+
+        .am-pm {
+            font-size: 1.5rem;
+            margin-left: 20px;
+            letter-spacing: 3px;
+        }
+
+        /* Sidebar Settings */
+        #settings-panel {
+            position: fixed;
+            top: 0;
+            left: -380px;
+            width: 350px;
+            max-width: 90vw;
+            height: 100vh;
+            background: var(--panel-bg);
+            border-right: 2px solid var(--accent);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            padding: 20px 16px;
+            box-sizing: border-box;
+            z-index: 100;
+            box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+            overflow-y: auto;
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        #settings-panel.open {
+            transform: translateX(380px);
+        }
+
+        .settings-header {
+            font-size: 0.6rem;
+            margin-bottom: 16px;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 12px;
+            letter-spacing: 2px;
+            color: #999;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .settings-header svg {
+            width: 18px;
+            height: 18px;
+            fill: #999;
+            flex-shrink: 0;
+        }
+
+        .settings-section {
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--accent);
+        }
+
+        .settings-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .settings-section-title {
+            font-size: 0.4rem;
+            color: #666;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .settings-section-title svg {
+            width: 14px;
+            height: 14px;
+            fill: #666;
+            flex-shrink: 0;
+        }
+
+        .setting-item {
+            margin-bottom: 12px;
+        }
+
+        .setting-item label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.45rem;
+            color: #777;
+            letter-spacing: 1px;
+        }
+
+        .setting-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .setting-row input[type="number"] {
+            flex: 1;
+            background: #0a0a0a;
+            border: 2px solid var(--accent);
+            color: #ffffff;
+            padding: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            outline: none;
+            box-sizing: border-box;
+            width: 50px;
+            min-width: 40px;
+        }
+
+        .setting-row input[type="number"]:focus {
+            border-color: #666;
+            background: #111;
+        }
+
+        .setting-row input[type="number"].hidden {
+            display: none;
+        }
+
+        .setting-row .sep {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .toggle-group {
+            display: flex;
+            gap: 4px;
+            background: #0a0a0a;
+            border: 2px solid var(--accent);
+            padding: 2px;
+            border-radius: 0px;
+            flex-shrink: 0;
+        }
+
+        .toggle-btn {
+            background: transparent;
+            color: #666;
+            border: none;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.4rem;
+            transition: all 0.2s;
+            border-radius: 0px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .toggle-btn.active {
+            background: #ffffff;
+            color: #000000;
+        }
+
+        .toggle-btn:hover {
+            background: #333;
+            color: #fff;
+        }
+
+        .toggle-btn.active:hover {
+            background: #ffffff;
+            color: #000000;
+        }
+
+        .toggle-group-wide {
+            width: 100%;
+        }
+
+        .toggle-group-wide .toggle-btn {
+            flex: 1;
+            text-align: center;
+            padding: 6px 8px;
+            font-size: 0.4rem;
+        }
+
+        select {
+            width: 100%;
+            background: #0a0a0a;
+            border: 2px solid var(--accent);
+            color: #ffffff;
+            padding: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.7rem;
+            outline: none;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        select:focus {
+            border-color: #666;
+            background: #111;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            background: #0a0a0a;
+            border: 2px solid var(--accent);
+            color: #ffffff;
+            padding: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.45rem;
+            outline: none;
+            box-sizing: border-box;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        input[type="file"]::-webkit-file-upload-button {
+            background: #222;
+            color: #fff;
+            border: none;
+            padding: 4px 8px;
+            font-family: 'Courier New', monospace;
+            cursor: pointer;
+            font-size: 0.45rem;
+        }
+
+        textarea#css-editor {
+            width: 100%;
+            height: 100px;
+            background: #0a0a0a;
+            border: 2px solid var(--accent);
+            color: #88ff88;
+            padding: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.5rem;
+            outline: none;
+            box-sizing: border-box;
+            resize: vertical;
+            -webkit-tap-highlight-color: transparent;
+            line-height: 1.5;
+        }
+
+        textarea#css-editor:focus {
+            border-color: #666;
+            background: #111;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .btn {
+            background: transparent;
+            color: #aaa;
+            border: 2px solid var(--accent);
+            padding: 10px 12px;
+            cursor: pointer;
+            width: 100%;
+            font-family: 'Press Start 2P', cursive;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+            font-size: 0.4rem;
+            -webkit-tap-highlight-color: transparent;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background: #ffffff;
+            color: #000000;
+            border-color: #ffffff;
+        }
+
+        .btn-test {
+            border-color: #442222;
+            color: #884444;
+        }
+
+        .btn-test:hover {
+            background: #442222;
+            color: white;
+            border-color: #442222;
+        }
+
+        .btn-hour-test {
+            border-color: #224466;
+            color: #4488aa;
+        }
+
+        .btn-hour-test:hover {
+            background: #224466;
+            color: white;
+            border-color: #224466;
+        }
+
+        .btn-success {
+            border-color: #226622;
+            color: #44aa44;
+        }
+
+        .btn-success:hover {
+            background: #226622;
+            color: white;
+            border-color: #226622;
+        }
+
+        .btn-apply-css {
+            border-color: #664422;
+            color: #aa8844;
+        }
+
+        .btn-apply-css:hover {
+            background: #664422;
+            color: white;
+            border-color: #664422;
+        }
+
+        .custom-tone-label {
+            font-size: 0.35rem;
+            color: #555;
+            margin-top: 4px;
+            word-break: break-all;
+        }
+
+        /* Alarm List */
+        .alarm-list {
+            margin-top: 8px;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        .alarm-list::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        .alarm-list::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+
+        .alarm-list::-webkit-scrollbar-thumb {
+            background: #333;
+        }
+
+        .alarm-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 6px;
+            border-bottom: 1px solid var(--accent);
+            font-size: 0.35rem;
+            gap: 6px;
+        }
+
+        .alarm-item .time {
+            color: #fff;
+            letter-spacing: 1px;
+            font-size: 0.4rem;
+            flex-shrink: 0;
+        }
+
+        .alarm-item .status {
+            font-size: 0.3rem;
+            padding: 2px 5px;
+            border: 1px solid var(--accent);
+            flex-shrink: 0;
+        }
+
+        .alarm-item .status.on {
+            border-color: #44aa44;
+            color: #44aa44;
+        }
+
+        .alarm-item .status.off {
+            border-color: #aa4444;
+            color: #aa4444;
+        }
+
+        .alarm-item .actions {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .alarm-item .actions button {
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: #888;
+            padding: 2px 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 0.3rem;
+            transition: all 0.2s;
+        }
+
+        .alarm-item .actions button:hover {
+            background: #333;
+            color: #fff;
+        }
+
+        .alarm-item .actions .toggle-alarm:hover {
+            border-color: #44aa44;
+            color: #44aa44;
+        }
+
+        .alarm-item .actions .delete-alarm:hover {
+            border-color: #aa4444;
+            color: #aa4444;
+        }
+
+        /* Swipe Trigger Area */
+        #swipe-trigger {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 40px;
+            height: 100%;
+            z-index: 50;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #swipe-trigger svg {
+            opacity: 0.3;
+            transition: opacity 0.3s;
+        }
+
+        #swipe-trigger:hover svg {
+            opacity: 0.7;
+        }
+
+        /* Overlay */
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s;
+            z-index: 90;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        #overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* 6 AM Celebration Screen */
+        #celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--celeb-bg, #000000);
+            display: none;
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            flex-direction: column;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        #celebration.active {
+            display: flex;
+        }
+
+        #celebration.fade-out {
+            opacity: 0;
+        }
+
+        .celeb-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+        }
+
+        .flip-container {
+            position: relative;
+            height: 3rem;
+            width: 2rem;
+            overflow: hidden;
+            margin: 0 2px;
+        }
+
+        .flip-digit {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            font-size: 2.8rem;
+            line-height: 3rem;
+            font-family: 'Press Start 2P', cursive;
+            letter-spacing: 0px;
+            color: var(--flip-color, #ffffff);
+        }
+
+        .digit-old {
+            top: 0;
+        }
+
+        .digit-new {
+            top: -3rem;
+        }
+
+        .time-sep-celeb {
+            font-size: 2.8rem;
+            line-height: 3rem;
+            margin: 0 3px;
+            font-family: 'Press Start 2P', cursive;
+            animation: blink 1s infinite;
+            color: var(--flip-color, #ffffff);
+        }
+
+        .big-am {
+            font-size: 1.2rem;
+            margin-top: 1.5rem;
+            letter-spacing: 3px;
+            font-family: 'Press Start 2P', cursive;
+            transition: all 0.3s ease;
+            color: var(--flip-color, #ffffff);
+        }
+
+        /* Hour-only mode - larger AM/PM after time */
+        .celeb-content.hour-only .minute {
+            display: none !important;
+        }
+        
+        .celeb-content.hour-only .time-sep-celeb {
+            display: none !important;
+        }
+
+        .celeb-content.hour-only ~ .big-am {
+            font-size: 2.8rem !important;
+            margin-top: 0 !important;
+            margin-left: 20px !important;
+            letter-spacing: 5px !important;
+        }
+
+        #celebration.hour-only-mode {
+            flex-direction: row !important;
+            gap: 0 !important;
+        }
+
+        #celebration.hour-only-mode .celeb-content {
+            display: flex;
+            align-items: center;
+        }
+
+        #celebration.hour-only-mode .big-am {
+            font-size: 2.8rem !important;
+            margin-top: 0 !important;
+            margin-left: 20px !important;
+            letter-spacing: 5px !important;
+            position: relative;
+            top: 0;
+        }
+
+        /* Animation - 3 seconds */
+        @keyframes fnafShiftDown {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(3rem); }
+        }
+
+        /* Minute animation - 3s total, starts immediately */
+        .flip-container.minute.animating .digit-old,
+        .flip-container.minute.animating .digit-new {
+            animation: fnafShiftDown 3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+
+        /* Hour animation - starts after 1.5s (half of 3s) */
+        .flip-container.hour.animating .digit-old,
+        .flip-container.hour.animating .digit-new {
+            animation: fnafShiftDown 3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+            animation-delay: 1.5s;
+        }
+
+        /* Scanline Effect */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                rgba(18, 16, 16, 0) 50%,
+                rgba(0, 0, 0, 0.1) 50%
+            );
+            background-size: 100% 4px;
+            z-index: 300;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        /* When celebration is hidden, hide all digits */
+        #celebration:not(.active) .flip-digit {
+            opacity: 0 !important;
+        }
+
+        /* Custom scrollbar */
+        #settings-panel::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        #settings-panel::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+
+        #settings-panel::-webkit-scrollbar-thumb {
+            background: #333;
+        }
+
+        /* Remove blue highlight on all interactive elements */
+        * {
+            -webkit-tap-highlight-color: transparent !important;
+        }
+
+        /* Custom CSS from editor */
+        #custom-css-styles {
+            display: none;
+        }
+    </style>
+    <style id="custom-css-styles"></style>
+</head>
+<body>
+
+    <div class="scanlines"></div>
+    
+    <!-- Swipe Trigger with SVG -->
+    <div id="swipe-trigger">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+            <path d="M15 18l-6-6 6-6" stroke="#666" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M19 18l-6-6 6-6" stroke="#444" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </div>
+    
+    <div id="overlay"></div>
+
+    <div id="settings-panel">
+        <div class="settings-header">
+            <svg viewBox="0 0 24 24">
+                <path d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7z"/>
+                <path d="M19.43 12.91c.04-.3.04-.6 0-.9l1.85-1.44a.5.5 0 0 0 .12-.64l-1.75-3.03a.5.5 0 0 0-.6-.22l-2.16.86c-.44-.34-.92-.6-1.45-.8l-.32-2.27a.5.5 0 0 0-.5-.44h-3.5a.5.5 0 0 0-.5.44l-.32 2.27c-.53.2-1.01.46-1.45.8l-2.16-.86a.5.5 0 0 0-.6.22l-1.75 3.03a.5.5 0 0 0 .12.64l1.85 1.44c-.04.3-.04.6 0 .9l-1.85 1.44a.5.5 0 0 0-.12.64l1.75 3.03a.5.5 0 0 0 .6.22l2.16-.86c.44.34.92.6 1.45.8l.32 2.27a.5.5 0 0 0 .5.44h3.5a.5.5 0 0 0 .5-.44l.32-2.27c.53-.2 1.01-.46 1.45-.8l2.16.86a.5.5 0 0 0 .6-.22l1.75-3.03a.5.5 0 0 0-.12-.64l-1.85-1.44z"/>
+            </svg>
+            ALARM SETTINGS
+        </div>
+        
+        <!-- Alarm Setup -->
+        <div class="settings-section">
+            <div class="settings-section-title">
+                <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                NEW ALARM
+            </div>
+            <div class="setting-item">
+                <label>ALARM TIME</label>
+                <div class="setting-row">
+                    <input type="number" id="new-alarm-hour" min="1" max="12" value="6" style="width:50px;">
+                    <span class="sep" id="minute-separator">:</span>
+                    <input type="number" id="new-alarm-minute" min="0" max="59" value="0" style="width:50px;">
+                    <div class="toggle-group">
+                        <button class="toggle-btn active" id="new-am-btn">AM</button>
+                        <button class="toggle-btn" id="new-pm-btn">PM</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="setting-item">
+                <label>DISPLAY MODE</label>
+                <div class="toggle-group toggle-group-wide">
+                    <button class="toggle-btn active" id="mode-hour">HOUR ONLY</button>
+                    <button class="toggle-btn" id="mode-hourmin">HOUR+MIN</button>
+                </div>
+            </div>
+            
+            <button class="btn btn-success" id="add-alarm" style="margin-top:4px; font-size:0.4rem;">+ ADD ALARM</button>
+        </div>
+
+        <!-- Alarm List -->
+        <div class="settings-section">
+            <div class="settings-section-title">
+                <svg viewBox="0 0 24 24">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                ACTIVE ALARMS
+            </div>
+            <div class="alarm-list" id="alarm-list">
+                <!-- Alarms rendered here -->
+            </div>
+        </div>
+
+        <!-- Alarm Tone -->
+        <div class="settings-section">
+            <div class="settings-section-title">
+                <svg viewBox="0 0 24 24">
+                    <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
+                    <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+                </svg>
+                ALARM TONE
+            </div>
+            <div class="setting-item">
+                <label>SELECT TONE</label>
+                <select id="alarm-tone">
+                    <option value="fnaf.mp3">FNAF 6AM</option>
+                    <option value="https://assets.mixkit.co/active_storage/sfx/951/951-preview.mp3">BELL</option>
+                    <option value="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3">BEEP</option>
+                </select>
+            </div>
+            <div class="setting-item">
+                <label>CUSTOM TONE</label>
+                <input type="file" id="custom-tone" accept=".mp3,.wav,.ogg,.m4a,.aac">
+                <div class="custom-tone-label" id="custom-tone-label">No custom tone selected</div>
+            </div>
+        </div>
+
+        <!-- CSS Editor -->
+        <div class="settings-section">
+            <div class="settings-section-title">
+                <svg viewBox="0 0 24 24">
+                    <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+                    <polyline points="2 17 12 22 22 17"/>
+                    <polyline points="2 12 12 17 22 12"/>
+                </svg>
+                CSS EDITOR
+            </div>
+            <div class="setting-item">
+                <label>CUSTOM STYLES</label>
+                <textarea id="css-editor" placeholder="/* Custom CSS here */
+/* Example: */
+#celebration { background: #1a0a0a; }
+.flip-digit { color: #ff4444; }"></textarea>
+            </div>
+            <div style="display:flex; gap:6px;">
+                <button class="btn btn-apply-css" id="apply-css" style="flex:1;">APPLY CSS</button>
+                <button class="btn" id="reset-css" style="flex:1; border-color:#444; color:#666;">RESET</button>
+            </div>
+        </div>
+
+        <!-- Test Buttons -->
+        <div class="settings-section" style="border-bottom: none;">
+            <div class="settings-section-title">
+                <svg viewBox="0 0 24 24">
+                    <polygon points="22 3 22 15 16.5 11 16.5 15 7.5 9 7.5 13 2 9 2 3 7.5 7 7.5 3 16.5 9 16.5 5 22 9 22 3"/>
+                </svg>
+                TEST
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-test" id="test-alarm">TEST (CURRENT TIME)</button>
+                <button class="btn btn-hour-test" id="test-hour-change">TEST HOUR CHANGE (3 → 4)</button>
+                <button class="btn" id="save-settings">CLOSE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clock is hidden until alarm triggers -->
+    <div id="clock-container">
+        <div class="clock-display">
+            <span id="hour">12</span><span class="time-separator">:</span><span id="minute">00</span>
+            <span class="am-pm" id="ampm">PM</span>
+        </div>
+    </div>
+
+    <div id="celebration">
+        <div class="celeb-content" id="celeb-box">
+            <!-- Hour tens digit -->
+            <div class="flip-container hour" id="flip-h1">
+                <div class="flip-digit digit-old" id="digit-h1-old"></div>
+                <div class="flip-digit digit-new" id="digit-h1-new"></div>
+            </div>
+            <!-- Hour ones digit -->
+            <div class="flip-container hour" id="flip-h2">
+                <div class="flip-digit digit-old" id="digit-h2-old"></div>
+                <div class="flip-digit digit-new" id="digit-h2-new"></div>
+            </div>
+            
+            <span class="time-sep-celeb">:</span>
+            
+            <!-- Minute tens digit -->
+            <div class="flip-container minute" id="flip-m1">
+                <div class="flip-digit digit-old" id="digit-m1-old"></div>
+                <div class="flip-digit digit-new" id="digit-m1-new"></div>
+            </div>
+            <!-- Minute ones digit -->
+            <div class="flip-container minute" id="flip-m2">
+                <div class="flip-digit digit-old" id="digit-m2-old"></div>
+                <div class="flip-digit digit-new" id="digit-m2-new"></div>
+            </div>
+        </div>
+        <div class="big-am" id="celeb-am-pm">AM</div>
+    </div>
+
+    <audio id="alarm-audio" src="fnaf.mp3"></audio>
+
+    <script>
+        const hourEl = document.getElementById('hour');
+        const minuteEl = document.getElementById('minute');
+        const ampmEl = document.getElementById('ampm');
+        const clockContainer = document.getElementById('clock-container');
+        const settingsPanel = document.getElementById('settings-panel');
+        const overlay = document.getElementById('overlay');
+        const swipeTrigger = document.getElementById('swipe-trigger');
+        const celebration = document.getElementById('celebration');
+        const celebBox = document.getElementById('celeb-box');
+        const alarmAudio = document.getElementById('alarm-audio');
+        const celebAmPm = document.getElementById('celeb-am-pm');
+        const alarmListEl = document.getElementById('alarm-list');
+        const minuteSeparator = document.getElementById('minute-separator');
+        
+        // Settings elements
+        const newAlarmHourInput = document.getElementById('new-alarm-hour');
+        const newAlarmMinuteInput = document.getElementById('new-alarm-minute');
+        const newAmBtn = document.getElementById('new-am-btn');
+        const newPmBtn = document.getElementById('new-pm-btn');
+        const customToneInput = document.getElementById('custom-tone');
+        const customToneLabel = document.getElementById('custom-tone-label');
+        const toneSelect = document.getElementById('alarm-tone');
+        const modeHourBtn = document.getElementById('mode-hour');
+        const modeHourMinBtn = document.getElementById('mode-hourmin');
+        const addAlarmBtn = document.getElementById('add-alarm');
+        const saveSettingsBtn = document.getElementById('save-settings');
+        const testAlarmBtn = document.getElementById('test-alarm');
+        const testHourChangeBtn = document.getElementById('test-hour-change');
+        const cssEditor = document.getElementById('css-editor');
+        const applyCssBtn = document.getElementById('apply-css');
+        const resetCssBtn = document.getElementById('reset-css');
+        const customCssStyles = document.getElementById('custom-css-styles');
+        
+        // Alarm data
+        let alarms = [];
+        let alarmIdCounter = 0;
+        let isAlarming = false;
+        let displayMode = 'hour';
+        let currentAlarmId = null;
+        let celebrationTimeout = null;
+
+        // Load saved CSS
+        function loadCss() {
+            try {
+                const saved = localStorage.getItem('fnafCustomCss');
+                if (saved) {
+                    cssEditor.value = saved;
+                    applyCustomCss(saved);
+                }
+            } catch (e) {}
+        }
+
+        function saveCss(css) {
+            try {
+                localStorage.setItem('fnafCustomCss', css);
+            } catch (e) {}
+        }
+
+        function applyCustomCss(css) {
+            customCssStyles.textContent = css;
+            try {
+                const bgMatch = css.match(/background\s*:\s*([^;]+)/);
+                if (bgMatch) {
+                    celebration.style.background = bgMatch[1].trim();
+                }
+                const colorMatch = css.match(/color\s*:\s*([^;]+)/);
+                if (colorMatch) {
+                    document.querySelectorAll('.flip-digit, .time-sep-celeb, .big-am').forEach(el => {
+                        el.style.color = colorMatch[1].trim();
+                    });
+                }
+            } catch (e) {}
+        }
+
+        applyCssBtn.addEventListener('click', function() {
+            const css = cssEditor.value;
+            applyCustomCss(css);
+            saveCss(css);
+            console.log('Custom CSS applied!');
+        });
+
+        resetCssBtn.addEventListener('click', function() {
+            cssEditor.value = '';
+            customCssStyles.textContent = '';
+            celebration.style.background = '';
+            document.querySelectorAll('.flip-digit, .time-sep-celeb, .big-am').forEach(el => {
+                el.style.color = '';
+            });
+            saveCss('');
+            console.log('CSS reset!');
+        });
+
+        // Toggle minute input visibility based on mode
+        function updateDisplayMode() {
+            if (displayMode === 'hour') {
+                newAlarmMinuteInput.classList.add('hidden');
+                minuteSeparator.style.display = 'none';
+                celebBox.classList.add('hour-only');
+                celebration.classList.add('hour-only-mode');
+            } else {
+                newAlarmMinuteInput.classList.remove('hidden');
+                minuteSeparator.style.display = 'inline';
+                celebBox.classList.remove('hour-only');
+                celebration.classList.remove('hour-only-mode');
+            }
+        }
+
+        modeHourBtn.addEventListener('click', function() {
+            modeHourBtn.classList.add('active');
+            modeHourMinBtn.classList.remove('active');
+            displayMode = 'hour';
+            updateDisplayMode();
+        });
+
+        modeHourMinBtn.addEventListener('click', function() {
+            modeHourMinBtn.classList.add('active');
+            modeHourBtn.classList.remove('active');
+            displayMode = 'hourmin';
+            updateDisplayMode();
+        });
+
+        function loadAlarms() {
+            try {
+                const saved = localStorage.getItem('fnafAlarms');
+                if (saved) {
+                    alarms = JSON.parse(saved);
+                    alarmIdCounter = alarms.length > 0 ? Math.max(...alarms.map(a => a.id)) + 1 : 0;
+                }
+            } catch (e) {
+                alarms = [];
+            }
+            renderAlarms();
+        }
+
+        function saveAlarms() {
+            try {
+                localStorage.setItem('fnafAlarms', JSON.stringify(alarms));
+            } catch (e) {}
+        }
+
+        newAmBtn.addEventListener('click', function() {
+            newAmBtn.classList.add('active');
+            newPmBtn.classList.remove('active');
+        });
+
+        newPmBtn.addEventListener('click', function() {
+            newPmBtn.classList.add('active');
+            newAmBtn.classList.remove('active');
+        });
+
+        function getNewAlarmPeriod() {
+            return newAmBtn.classList.contains('active') ? 'AM' : 'PM';
+        }
+
+        addAlarmBtn.addEventListener('click', function() {
+            const hour = parseInt(newAlarmHourInput.value) || 6;
+            let minute = 0;
+            if (displayMode === 'hourmin') {
+                minute = parseInt(newAlarmMinuteInput.value) || 0;
+            }
+            const period = getNewAlarmPeriod();
+            
+            if (hour < 1 || hour > 12) {
+                alert('Hour must be 1-12');
+                return;
+            }
+            if (minute < 0 || minute > 59) {
+                alert('Minute must be 0-59');
+                return;
+            }
+
+            const exists = alarms.some(a => a.hour === hour && a.minute === minute && a.period === period);
+            if (exists) {
+                alert('Alarm already exists!');
+                return;
+            }
+
+            alarms.push({
+                id: alarmIdCounter++,
+                hour: hour,
+                minute: minute,
+                period: period,
+                enabled: true
+            });
+
+            saveAlarms();
+            renderAlarms();
+        });
+
+        function toggleAlarm(id) {
+            const alarm = alarms.find(a => a.id === id);
+            if (alarm) {
+                alarm.enabled = !alarm.enabled;
+                saveAlarms();
+                renderAlarms();
+            }
+        }
+
+        function deleteAlarm(id) {
+            alarms = alarms.filter(a => a.id !== id);
+            saveAlarms();
+            renderAlarms();
+        }
+
+        function renderAlarms() {
+            if (alarms.length === 0) {
+                alarmListEl.innerHTML = `<div style="color:#555; font-size:0.3rem; padding:8px; text-align:center;">No alarms set</div>`;
+                return;
+            }
+
+            alarmListEl.innerHTML = alarms.map(alarm => {
+                const statusClass = alarm.enabled ? 'on' : 'off';
+                const statusText = alarm.enabled ? 'ON' : 'OFF';
+                const hourDisplay = String(alarm.hour).padStart(2, '0');
+                const minDisplay = String(alarm.minute).padStart(2, '0');
+                const timeDisplay = displayMode === 'hour' ? `${hourDisplay} ${alarm.period}` : `${hourDisplay}:${minDisplay} ${alarm.period}`;
+                return `
+                    <div class="alarm-item">
+                        <span class="time">${timeDisplay}</span>
+                        <span class="status ${statusClass}">${statusText}</span>
+                        <div class="actions">
+                            <button class="toggle-alarm" onclick="toggleAlarm(${alarm.id})">${alarm.enabled ? 'OFF' : 'ON'}</button>
+                            <button class="delete-alarm" onclick="deleteAlarm(${alarm.id})">✕</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.toggleAlarm = toggleAlarm;
+        window.deleteAlarm = deleteAlarm;
+
+        customToneInput.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+
+        customToneInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                if (!file.type.startsWith('audio/')) {
+                    customToneLabel.textContent = 'Please select an audio file';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const data = e.target.result;
+                    customToneLabel.textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+                    
+                    let customOption = toneSelect.querySelector('option[value="custom"]');
+                    if (!customOption) {
+                        customOption = document.createElement('option');
+                        customOption.value = 'custom';
+                        customOption.textContent = 'CUSTOM';
+                        toneSelect.appendChild(customOption);
+                    }
+                    toneSelect.value = 'custom';
+                    window.customToneData = data;
+                };
+                reader.onerror = function() {
+                    customToneLabel.textContent = 'Error reading file';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function getAlarmAudioSrc() {
+            if (toneSelect.value === 'custom' && window.customToneData) {
+                return window.customToneData;
+            }
+            return toneSelect.value;
+        }
+
+        function checkAlarms() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            
+            let currentHour = hours % 12 || 12;
+            let currentMinute = minutes;
+            let currentPeriod = hours >= 12 ? 'PM' : 'AM';
+
+            for (const alarm of alarms) {
+                if (!alarm.enabled) continue;
+                
+                if (alarm.hour === currentHour && alarm.minute === currentMinute && alarm.period === currentPeriod) {
+                    const key = `${alarm.id}-${hours}-${minutes}`;
+                    if (window._lastTriggered === key) continue;
+                    window._lastTriggered = key;
+                    
+                    triggerAlarm(alarm.id);
+                    break;
+                }
+            }
+        }
+
+        function triggerAlarm(alarmId, customHour, customMinute, customPeriod) {
+            if (isAlarming) return;
+            
+            isAlarming = true;
+            currentAlarmId = alarmId;
+            
+            let alarm;
+            let isTest = false;
+            
+            if (customHour !== undefined && customMinute !== undefined && customPeriod !== undefined) {
+                isTest = true;
+                alarm = {
+                    id: alarmId,
+                    hour: customHour,
+                    minute: customMinute,
+                    period: customPeriod
+                };
+            } else {
+                alarm = alarms.find(a => a.id === alarmId);
+                if (!alarm) {
+                    isAlarming = false;
+                    return;
+                }
+                alarm.enabled = false;
+                saveAlarms();
+                renderAlarms();
+            }
+            
+            const audioSrc = getAlarmAudioSrc();
+            if (audioSrc) {
+                alarmAudio.src = audioSrc;
+            }
+            
+            let targetHour = alarm.hour;
+            let targetMin = alarm.minute;
+            const displayTargetHour = targetHour % 12 || 12;
+            
+            let prevMin = targetMin - 1;
+            let prevHour = displayTargetHour;
+            
+            if (prevMin < 0) {
+                prevMin = 59;
+                prevHour = displayTargetHour - 1;
+                if (prevHour < 1) prevHour = 12;
+            }
+            
+            const prevHourStr = String(prevHour).padStart(2, '0');
+            const prevMinStr = String(prevMin).padStart(2, '0');
+            const currHourStr = String(displayTargetHour).padStart(2, '0');
+            const currMinStr = String(targetMin).padStart(2, '0');
+            
+            const hourChanges = (prevHour !== displayTargetHour);
+            
+            document.querySelectorAll('.flip-container').forEach(el => {
+                el.classList.remove('animating');
+                el.style.transform = 'none';
+            });
+            celebration.classList.remove('fade-out');
+            clockContainer.classList.remove('visible');
+
+            document.getElementById('digit-h1-old').textContent = prevHourStr[0];
+            document.getElementById('digit-h2-old').textContent = prevHourStr[1];
+            document.getElementById('digit-m1-old').textContent = prevMinStr[0];
+            document.getElementById('digit-m2-old').textContent = prevMinStr[1];
+            
+            document.getElementById('digit-h1-new').textContent = currHourStr[0];
+            document.getElementById('digit-h2-new').textContent = currHourStr[1];
+            document.getElementById('digit-m1-new').textContent = currMinStr[0];
+            document.getElementById('digit-m2-new').textContent = currMinStr[1];
+            
+            document.querySelectorAll('.digit-old').forEach(el => {
+                el.style.top = '0';
+            });
+            document.querySelectorAll('.digit-new').forEach(el => {
+                el.style.top = '-3rem';
+            });
+            
+            celebAmPm.textContent = alarm.period;
+            
+            updateDisplayMode();
+            celebration.classList.add('active');
+
+            alarmAudio.loop = false;
+            alarmAudio.play().catch(e => {});
+
+            setTimeout(() => {
+                document.getElementById('flip-m1').classList.add('animating');
+                document.getElementById('flip-m2').classList.add('animating');
+                
+                if (hourChanges) {
+                    document.getElementById('flip-h1').classList.add('animating');
+                    document.getElementById('flip-h2').classList.add('animating');
+                } else {
+                    document.getElementById('digit-h1-old').textContent = currHourStr[0];
+                    document.getElementById('digit-h2-old').textContent = currHourStr[1];
+                    document.getElementById('digit-h1-new').textContent = currHourStr[0];
+                    document.getElementById('digit-h2-new').textContent = currHourStr[1];
+                }
+            }, 300);
+
+            if (celebrationTimeout) {
+                clearTimeout(celebrationTimeout);
+            }
+            celebrationTimeout = setTimeout(() => {
+                dismissAlarm();
+                if (isTest) {
+                    const index = alarms.findIndex(a => a.id === alarmId);
+                    if (index !== -1) {
+                        alarms.splice(index, 1);
+                        saveAlarms();
+                        renderAlarms();
+                    }
+                }
+            }, 8000);
+        }
+
+        function dismissAlarm() {
+            if (celebrationTimeout) {
+                clearTimeout(celebrationTimeout);
+                celebrationTimeout = null;
+            }
+            
+            document.querySelectorAll('.digit-old, .digit-new').forEach(el => {
+                el.textContent = '';
+            });
+            
+            celebration.classList.remove('active');
+            celebration.classList.remove('fade-out');
+            document.querySelectorAll('.flip-container').forEach(el => {
+                el.classList.remove('animating');
+            });
+            
+            isAlarming = false;
+            alarmAudio.pause();
+            alarmAudio.currentTime = 0;
+            currentAlarmId = null;
+        }
+
+        celebration.addEventListener('click', function(e) {
+            if (isAlarming) {
+                dismissAlarm();
+            }
+        });
+
+        let touchStartX = 0;
+        
+        document.addEventListener('touchstart', function(e) {
+            touchStartX = e.touches[0].clientX;
+        });
+
+        document.addEventListener('touchend', function(e) {
+            const touchEndX = e.changedTouches[0].clientX;
+            if (touchEndX - touchStartX > 60 && touchStartX < 40) {
+                openSettings();
+            }
+        });
+
+        swipeTrigger.addEventListener('click', function(e) {
+            openSettings();
+        });
+
+        function openSettings() {
+            settingsPanel.classList.add('open');
+            overlay.classList.add('active');
+        }
+
+        function closeSettings() {
+            settingsPanel.classList.remove('open');
+            overlay.classList.remove('active');
+        }
+
+        saveSettingsBtn.addEventListener('click', closeSettings);
+        overlay.addEventListener('click', closeSettings);
+        
+        testAlarmBtn.addEventListener('click', function() {
+            closeSettings();
+            setTimeout(function() {
+                const now = new Date();
+                const testAlarm = {
+                    id: alarmIdCounter++,
+                    hour: now.getHours() % 12 || 12,
+                    minute: now.getMinutes(),
+                    period: now.getHours() >= 12 ? 'PM' : 'AM',
+                    enabled: true
+                };
+                alarms.push(testAlarm);
+                saveAlarms();
+                renderAlarms();
+                triggerAlarm(testAlarm.id);
+            }, 500);
+        });
+
+        testHourChangeBtn.addEventListener('click', function() {
+            closeSettings();
+            setTimeout(function() {
+                const testAlarm = {
+                    id: alarmIdCounter++,
+                    hour: 4,
+                    minute: 0,
+                    period: 'AM',
+                    enabled: true
+                };
+                alarms.push(testAlarm);
+                saveAlarms();
+                renderAlarms();
+                triggerAlarm(testAlarm.id, 4, 0, 'AM');
+            }, 500);
+        });
+
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            
+            const displayHours = hours % 12 || 12;
+            
+            hourEl.textContent = String(displayHours).padStart(2, '0');
+            minuteEl.textContent = minutes;
+            ampmEl.textContent = ampm;
+
+            checkAlarms();
+        }
+
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        loadAlarms();
+        loadCss();
+        updateDisplayMode();
+
+        document.body.addEventListener('click', function() {
+            if (alarmAudio.paused && !isAlarming) {
+                alarmAudio.play().then(function() {
+                    alarmAudio.pause();
+                    alarmAudio.currentTime = 0;
+                }).catch(function() {});
+            }
+        }, { once: true });
+
+        console.log('FNAF Alarm Clock loaded!');
+        console.log('Settings panel has CSS editor - customize colors!');
+    </script>
+</body>
+</html>
