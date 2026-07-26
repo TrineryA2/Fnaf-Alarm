@@ -1,5 +1,9 @@
 # FNAF 6:00 AM Alarm
 
+## ⚠️ Note
+
+This is a **visual alarm clock**. The animation and sound only play when the app is open and in the foreground. For best results, keep the app open on a desk while charging.
+
 A Five Nights at Freddy's inspired alarm clock with dramatic flip animations, multiple alarms, and complete visual customization.
 
 ## Features
